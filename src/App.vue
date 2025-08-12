@@ -33,7 +33,6 @@
       <section class="details-section">
         <h3>Detail Atribut Data</h3>
         <p>Arahkan kursor ke poligon pada peta untuk melihat detail per desa. Di bawah ini adalah data dari wilayah yang Anda pilih.</p>
-        
         <div v-if="featureForTable" class="dataframe">
           <p><strong>Data untuk Desa/Kelurahan: {{ featureForTable.WADMKD }}, Kecamatan: {{ featureForTable.WADMKC }}</strong></p>
           <table>
@@ -76,118 +75,62 @@ const isTransitioning = ref(false);
 const hoveredFeature = ref(null);
 
 const mapOptions = ref([
-  { value: 'gwp_class_', text: 'Peta Potensi Air Tanah' },
-  { value: 'elevasi', text: 'Peta Elevasi' },
-  { value: 'slope', text: 'Peta Kemiringan Lereng (Slope)' },
-  { value: 'ndvi', text: 'Peta Indeks Vegetasi (NDVI)' },
-  { value: 'rainfall', text: 'Peta Curah Hujan (Rainfall)' },
-  { value: 'twi', text: 'Peta Indeks Topografi Basah (TWI)' },
-  { value: 'curvature', text: 'Peta Kelengkungan (Curvature)' },
+  { value: 'gwp_class', text: 'Peta Potensi Air Tanah' },
+  { value: 'Elevasi', text: 'Peta Elevasi' },
+  { value: 'Slope', text: 'Peta Kemiringan Lereng (Slope)' },
+  { value: 'NDVI', text: 'Peta Indeks Vegetasi (NDVI)' },
+  { value: 'Rainfall', text: 'Peta Curah Hujan (Rainfall)' },
+  { value: 'TWI', text: 'Peta Indeks Topografi Basah (TWI)' },
+  { value: 'Curvature', text: 'Peta Kelengkungan (Curvature)' },
   { value: 'Aspect', text: 'Peta Aspek Lereng' },
-  { value: 'Jenis_Tana', text: 'Peta Jenis Tanah' },
+  { value: 'Jenis_Tanah', text: 'Peta Jenis Tanah' },
   { value: 'LULC', text: 'Peta Tutupan Lahan (LULC)' },
-  { value: 'Litologi_1', text: 'Peta Litologi' },
-  { value: 'Tekstur_ta', text: 'Peta Tekstur Tanah' },
+  { value: 'Litologi', text: 'Peta Litologi' },
+  { value: 'Tekstur_Tanah', text: 'Peta Tekstur Tanah' },
 ]);
-const selectedLayer = ref('gwp_class_');
+const selectedLayer = ref('gwp_class');
 
 // Computed Properties
 const activeLayerName = computed(() => mapOptions.value.find(opt => opt.value === selectedLayer.value)?.text || 'Data');
 const geojsonOptions = computed(() => ({ style: styleFeature, onEachFeature: onEachFeature }));
 
-// BARU: Computed property untuk menentukan data apa yang ditampilkan di tabel
+// BARU: Computed property untuk menentukan data apa yang akan ditampilkan di tabel
 const featureForTable = computed(() => {
-  // Jika ada desa yang di-hover, tampilkan datanya
+  // Jika ada desa yang sedang di-hover, tampilkan datanya.
   if (hoveredFeature.value) {
     return hoveredFeature.value;
   }
-  // Jika tidak, tampilkan data desa pertama sebagai contoh
+  // Jika tidak, dan data sudah dimuat, tampilkan data desa pertama sebagai contoh.
   if (geojsonData.value) {
     return geojsonData.value.features[0].properties;
   }
+  // Jika belum ada data sama sekali.
   return null;
 });
 
-
 // Functions
 const getColor = (property, value) => {
-  const numValue = parseFloat(value); // Pastikan nilai numerik (float juga aman)
-  if (isNaN(numValue)) return '#808080'; // Warna abu untuk nilai null/invalid
-
+  const numValue = Number(value);
+  if (isNaN(numValue)) return '#808080';
   switch (property) {
-    case 'gwp_class_':
-      if (numValue >= 5) return '#2b83ba';
-      if (numValue >= 4) return '#abdda4';
-      if (numValue >= 3) return '#ffffbf';
-      if (numValue >= 2) return '#fdae61';
-      if (numValue >= 1) return '#d7191c';
-      return '#cccccc';
-
-
-    case 'elevasi':
-      return numValue > 1000 ? '#5e3c99' :
-             numValue > 500  ? '#b2abd2' :
-             numValue > 200  ? '#f7f7f7' :
-             numValue > 50   ? '#d8daeb' : '#fde0ef';
-
-    case 'slope':
-      return numValue > 40 ? '#d7191c' :
-             numValue > 25 ? '#fdae61' :
-             numValue > 15 ? '#ffffbf' :
-             numValue > 5  ? '#abdda4' : '#2b83ba';
-
-    case 'ndvi':
-      return numValue > 0.8 ? '#00441b' :
-             numValue > 0.6 ? '#238b45' :
-             numValue > 0.4 ? '#66c2a4' :
-             numValue > 0.2 ? '#b2e2e2' : '#edf8fb';
-
-    case 'rainfall':
-      return numValue > 3000 ? '#081d58' :
-             numValue > 2500 ? '#253494' :
-             numValue > 2000 ? '#225ea8' :
-             numValue > 1500 ? '#1d91c0' : '#41b6c4';
-
-    case 'twi':
-      return numValue > 15 ? '#0c2c84' :
-             numValue > 10 ? '#225ea8' :
-             numValue > 5  ? '#1d91c0' :
-             numValue > 2  ? '#7fcdbb' : '#ccece6';
-
-    case 'curvature':
-      return numValue > 0.5  ? '#d73027' :
-             numValue > 0.1  ? '#fc8d59' :
-             numValue > -0.1 ? '#fee08b' :
-             numValue > -0.5 ? '#91cf60' : '#1a9850';
-
-    case 'Aspect':
-    case 'Jenis_Tana':
-    case 'LULC':
-    case 'Litologi_1':
-    case 'Tekstur_ta':
-      const colors = [
-        '#e41a1c', '#377eb8', '#4daf4a', '#984ea3',
-        '#ff7f00', '#ffff33', '#a65628', '#f781bf',
-        '#999999', '#66c2a5', '#fc8d62', '#8da0cb'
-      ];
-      return colors[Math.abs(Math.floor(numValue)) % colors.length];
-
-    default:
-      return '#cccccc';
+    case 'gwp_class': return numValue >= 5 ? '#2b83ba' : numValue >= 4 ? '#abdda4' : numValue >= 3 ? '#ffffbf' : numValue >= 2 ? '#fdae61' : '#d7191c';
+    case 'Elevasi': return numValue > 1000 ? '#5e3c99' : numValue > 500 ? '#b2abd2' : numValue > 200 ? '#f7f7f7' : numValue > 50 ? '#d8daeb' : '#fde0ef';
+    case 'Slope': return numValue > 40 ? '#d7191c' : numValue > 25 ? '#fdae61' : numValue > 15 ? '#ffffbf' : numValue > 5 ? '#abdda4' : '#2b83ba';
+    case 'NDVI': return numValue > 0.8 ? '#00441b' : numValue > 0.6 ? '#238b45' : numValue > 0.4 ? '#66c2a4' : numValue > 0.2 ? '#b2e2e2' : '#edf8fb';
+    case 'Rainfall': return numValue > 3000 ? '#081d58' : numValue > 2500 ? '#253494' : numValue > 2000 ? '#225ea8' : numValue > 1500 ? '#1d91c0' : '#41b6c4';
+    case 'TWI': return numValue > 15 ? '#0c2c84' : numValue > 10 ? '#225ea8' : numValue > 5 ? '#1d91c0' : numValue > 2 ? '#7fcdbb' : '#ccece6';
+    case 'Curvature': return numValue > 0.5 ? '#d73027' : numValue > 0.1 ? '#fc8d59' : numValue > -0.1 ? '#fee08b' : numValue > -0.5 ? '#91cf60' : '#1a9850';
+    case 'Aspect': case 'Jenis_Tanah': case 'LULC': case 'Litologi': case 'Tekstur_Tanah':
+      const colors = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628', '#f781bf', '#999999', '#66c2a5', '#fc8d62', '#8da0cb'];
+      return colors[Math.floor(numValue) % colors.length];
+    default: return '#cccccc';
   }
 };
 
-const styleFeature = (feature) => {
-  const propertyName = selectedLayer.value;
-  const propertyValue = feature.properties[propertyName];
-  return {
-    fillColor: getColor(propertyName, propertyValue),
-    weight: 1,
-    opacity: 1,
-    color: '#ffffff',
-    fillOpacity: 0.7
-  };
-};
+const styleFeature = (feature) => ({
+  fillColor: getColor(selectedLayer.value, feature.properties[selectedLayer.value]),
+  weight: 1, opacity: 1, color: 'white', fillOpacity: 0.7
+});
 
 // DIPERBARUI: onEachFeature sekarang juga mengupdate state hoveredFeature
 const onEachFeature = (feature, layer) => {
@@ -225,51 +168,12 @@ onMounted(async () => {
     geojsonData.value = await response.json();
   } catch (error) {
     console.error('Gagal memuat GeoJSON:', error);
-    alert('Gagal memuat data peta.');
+    alert('Gagal memuat data peta. Pastikan file `peta_lengkap.geojson` ada di folder `public`.');
   } finally {
     loading.value = false;
   }
 });
 </script>
-
-<style scoped>
-.legend-container {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background-color: rgba(36, 36, 36, 0.85);
-  padding: 10px 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-  z-index: 1000;
-  color: #f0f0f0;
-  max-width: 200px;
-}
-.legend-container h4 {
-  margin: 0 0 10px 0;
-  font-size: 1rem;
-  text-align: center;
-  border-bottom: 1px solid #555;
-  padding-bottom: 5px;
-}
-.legend-container ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.legend-container li {
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-  font-size: 0.85rem;
-}
-.legend-color-box {
-  width: 18px;
-  height: 18px;
-  margin-right: 10px;
-  border: 1px solid #777;
-}
-</style>
 
 <style>
 /* Style Global */
@@ -286,7 +190,6 @@ body {
   background-color: var(--secondary-bg);
   color: var(--text-color);
 }
-/* Layout Utama */
 .app-wrapper {
   max-width: 1200px;
   margin: 0 auto;
@@ -341,14 +244,12 @@ body {
   border: 1px solid var(--border-color);
   background-color: #1a1a1a;
 }
-/* Animasi Transisi */
 .map-container .leaflet-pane {
   transition: opacity 0.25s ease-in-out;
 }
 .map-container.map-transitioning .leaflet-pane {
   opacity: 0;
 }
-/* Style untuk Tooltip Peta */
 .map-tooltip .leaflet-tooltip-content {
   background-color: rgba(36, 36, 36, 0.9) !important;
   color: var(--text-color) !important;
@@ -363,7 +264,6 @@ body {
 .leaflet-tooltip-top:before, .leaflet-tooltip-bottom:before, .leaflet-tooltip-left:before, .leaflet-tooltip-right:before {
   border: none !important;
 }
-/* Tabel Data Detail */
 .details-section {
   margin-top: 2rem;
 }
@@ -399,7 +299,6 @@ body {
 .dataframe tr:last-child td {
   border-bottom: none;
 }
-/* Loading Spinner */
 .loading-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; color: white; }
 .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid var(--accent-color); width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 1rem; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
