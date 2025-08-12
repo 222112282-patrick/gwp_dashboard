@@ -1,26 +1,23 @@
 {
-  "name": "groundwater-dashboard",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@vue-leaflet/vue-leaflet": "^0.10.1",
-    "chart.js": "^4.5.0",
-    "leaflet": "^1.9.4",
-    "vue": "^3.5.18",
-    "vue-chartjs": "^5.3.2"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.0.6",
-    "vite-plugin-vue-devtools": "^8.0.0"
-  }
+    "name": "groundwater-dashboard",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@vue-leaflet/vue-leaflet": "^0.10.1",
+        "chart.js": "^4.4.1",
+        "leaflet": "^1.9.4",
+        "vue": "^3.4.21",
+        "vue-chartjs": "^5.3.0"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^5.0.4",
+        "vite": "^5.2.8",
+        "vite-plugin-vue-devtools": "^7.2.1"
+    }
 }
