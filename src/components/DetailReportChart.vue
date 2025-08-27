@@ -8,8 +8,8 @@
 import { computed } from 'vue';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import { layerConfig, detailChartLayers } from '../mapConfig.js';
 
-// Daftarkan semua elemen yang dibutuhkan oleh Bar Chart
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 const props = defineProps({
@@ -23,27 +23,22 @@ const chartData = computed(() => {
   const properties = props.featureProperties;
   if (!properties) return null;
 
-  // --- BAGIAN INI DIPERBARUI ---
-  // Kita ambil 6 parameter kunci dengan NILAI ASLINYA (TANPA NORMALISASI)
-  const dataValues = [
-    properties.gwp_class_ || 0,
-    properties.elevasi || 0,
-    properties.slope || 0,
-    properties.ndvi || 0,
-    properties.rainfall || 0,
-    properties.twi || 0,
-  ];
-
-  const labels = ['Potensi Air', 'Elevasi', 'Slope', 'NDVI', 'Curah Hujan', 'TWI'];
+  const labels = detailChartLayers.map(key => layerConfig[key]?.title || key);
+  
+  const dataValues = detailChartLayers.map(key => {
+    const config = layerConfig[key];
+    if (!config) return 0;
+    return properties[config.dataKey] || 0;
+  });
 
   return {
     labels: labels,
     datasets: [
       {
-        label: `Profil Desa ${properties.WADMKD || ''}`,
-        backgroundColor: [ // Beri warna berbeda untuk setiap bar
+        label: `Profil Desa ${properties.Desa || ''}`,
+        backgroundColor: [
           '#42b883', '#8da0cb', '#fc8d62', 
-          '#66c2a5', '#e78ac3', '#a6d854'
+          '#66c2a5', '#e78ac3', '#a6d854', '#ffd92f'
         ],
         borderColor: '#555',
         borderWidth: 1,
@@ -53,18 +48,17 @@ const chartData = computed(() => {
   };
 });
 
-// Opsi untuk Bar Chart Horizontal
 const chartOptions = {
-  indexAxis: 'y', // Ini yang membuat chart menjadi horizontal
+  indexAxis: 'y', 
   responsive: true,
   maintainAspectRatio: false,
   plugins: { 
     legend: { 
-      display: false // Sembunyikan legenda default, karena nama parameter sudah ada di sumbu Y
+      display: false 
     },
     title: {
       display: true,
-      text: 'Nilai Asli Parameter',
+      text: 'Nilai Atribut',
       color: '#f0f0f0',
       font: {
         size: 14
@@ -72,11 +66,11 @@ const chartOptions = {
     }
   },
   scales: {
-    x: { // Sumbu X sekarang adalah sumbu nilai
+    x: {
       ticks: { color: '#ccc' },
       grid: { color: '#444' }
     },
-    y: { // Sumbu Y sekarang adalah sumbu kategori/parameter
+    y: { 
       ticks: { color: '#ccc' },
       grid: { color: 'transparent' }
     }
@@ -86,7 +80,7 @@ const chartOptions = {
 
 <style scoped>
 .bar-chart-container {
-  height: 300px; /* Anda bisa sesuaikan tingginya */
+  height: 300px; 
   margin-top: 1rem;
   padding: 0.5rem;
 }
